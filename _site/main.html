@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+    <html>
+    <head>
+        <meta http-equiv="Content-type" content="text/html;charset=UTF-8">
+        <title>The Problem of Generalization</title>
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.css" integrity="sha384-9eLZqc9ds8eNjO3TmqPeYcDj8n+Qfa4nuSiGYa6DjLNcv9BtN69ZIulL9+8CqC9Y" crossorigin="anonymous">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/markdown.css">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/highlight.css">
+        <link href="https://cdn.jsdelivr.net/npm/katex-copytex@latest/dist/katex-copytex.min.css" rel="stylesheet" type="text/css">
+        <style>
+.task-list-item { list-style-type: none; } .task-list-item-checkbox { margin-left: -20px; vertical-align: middle; }
+</style>
+        <style>
+
+			.slidecontainer {
+			  width: 100%;
+			}
+
+			.slider {
+			  -webkit-appearance: none;
+			  width: 100%;
+			  height: 25px;
+			  background: #d3d3d3;
+			  outline: none;
+			  opacity: 0.7;
+			  -webkit-transition: .2s;
+			  transition: opacity .2s;
+			}
+
+			.slider:hover {
+			  opacity: 1;
+			}
+
+			.slider::-webkit-slider-thumb {
+			  -webkit-appearance: none;
+			  appearance: none;
+			  width: 25px;
+			  height: 25px;
+			  background: #4CAF50;
+			  cursor: pointer;
+			}
+
+			.slider::-moz-range-thumb {
+			  width: 25px;
+			  height: 25px;
+			  background: #4CAF50;
+			  cursor: pointer;
+			}
+            body {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe WPC', 'Segoe UI', 'Ubuntu', 'Droid Sans', sans-serif;
+                font-size: 14px;
+                line-height: 1.6;
+            }
+        </style>
+        
+        <script src="https://cdn.jsdelivr.net/npm/katex-copytex@latest/dist/katex-copytex.min.js"></script>
+    </head>
+    <body>
+        <h1 id="the-problem-of-generalization">The Problem of Generalization</h1>
+<p>How do generative models generalize? For example, if every image contains 2 objects, will generative models generate images with 1 or 3 objects?</p>
+<p><img src="file:///home/zsj/Projects/BiasAndGeneralizationBlog/img/example_count.png" alt="example_count"></p>
+<p>If the training image has red/blue cars but only red buses, will generative models generate blue buses.</p>
+<p><img src="file:///home/zsj/Projects/BiasAndGeneralizationBlog/img/example_car.png" alt="example_car"></p>
+<p>These questions are extremely difficult to answer. In fact, it is not even clear what is &quot;good&quot; generalization. For example, should a model generate exotic combinations such as black swan or black snow. If they shouldn't, how do we decide which combinations are exotic and which are not? These questions seem to fundamentally lack a clear-cut correct answer.</p>
+<p><img src="file:///home/zsj/Projects/BiasAndGeneralizationBlog/img/example_swan.png" alt="example_swan"></p>
+<p>One could, of course, argue that log likelihood (on the test set) is a good evaluation metric -- or at least it seems to be the most objective and least ad-hoc. However, in addition to the noted practical short-comings of log likelihood [1], there is a deeper and more fundamental objection.</p>
+<h2 id="one-more-reason-to-be-dissatisfied-with-log-likelihood">(One more) reason to be dissatisfied with log likelihood</h2>
+<p>When we talk about log likelihood we always assume some underlying distribution <span class="katex"><span class="katex-mathml"><math><semantics><mrow><msup><mi>p</mi><mo>∗</mo></msup></mrow><annotation encoding="application/x-tex">p^*</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8831359999999999em;vertical-align:-0.19444em;"></span><span class="mord"><span class="mord mathdefault">p</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.688696em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mbin mtight">∗</span></span></span></span></span></span></span></span></span></span></span>, and we assume that we have some test examples <span class="katex"><span class="katex-mathml"><math><semantics><mrow><msup><mi>x</mi><mn>1</mn></msup><mo separator="true">,</mo><mo>⋯</mo><mtext>&ThinSpace;</mtext><mo separator="true">,</mo><msup><mi>x</mi><mi>k</mi></msup></mrow><annotation encoding="application/x-tex">x^1, \cdots, x^k</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1.043548em;vertical-align:-0.19444em;"></span><span class="mord"><span class="mord mathdefault">x</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8141079999999999em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">1</span></span></span></span></span></span></span></span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="minner">⋯</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord"><span class="mord mathdefault">x</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.849108em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathdefault mtight" style="margin-right:0.03148em;">k</span></span></span></span></span></span></span></span></span></span></span> drawn i.i.d. from <span class="katex"><span class="katex-mathml"><math><semantics><mrow><msup><mi>p</mi><mo>∗</mo></msup></mrow><annotation encoding="application/x-tex">p^*</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8831359999999999em;vertical-align:-0.19444em;"></span><span class="mord"><span class="mord mathdefault">p</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.688696em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mbin mtight">∗</span></span></span></span></span></span></span></span></span></span></span>. However, <span class="katex"><span class="katex-mathml"><math><semantics><mrow><msup><mi>x</mi><mn>1</mn></msup><mo separator="true">,</mo><mo>⋯</mo><mtext>&ThinSpace;</mtext><mo separator="true">,</mo><msup><mi>x</mi><mi>k</mi></msup></mrow><annotation encoding="application/x-tex">x^1, \cdots, x^k</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1.043548em;vertical-align:-0.19444em;"></span><span class="mord"><span class="mord mathdefault">x</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8141079999999999em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">1</span></span></span></span></span></span></span></span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="minner">⋯</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord"><span class="mord mathdefault">x</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.849108em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathdefault mtight" style="margin-right:0.03148em;">k</span></span></span></span></span></span></span></span></span></span></span> are usually drawn from some ad-hoc distribution. For example, MNIST is collected from handwritten zipcodes from a particular population, preprocessed in a particular way, and reflects the selection bias of the people collecting the examples --- had someone else prepared this dataset, it would certainly look much different; The same can be said for CIFAR, ImageNet, and essentially every dataset that we have. When we say the training and test data <span class="katex"><span class="katex-mathml"><math><semantics><mrow><msup><mi>x</mi><mn>1</mn></msup><mo separator="true">,</mo><mo>⋯</mo><mtext>&ThinSpace;</mtext><mo separator="true">,</mo><msup><mi>x</mi><mi>k</mi></msup></mrow><annotation encoding="application/x-tex">x^1, \cdots, x^k</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1.043548em;vertical-align:-0.19444em;"></span><span class="mord"><span class="mord mathdefault">x</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8141079999999999em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">1</span></span></span></span></span></span></span></span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="minner">⋯</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord"><span class="mord mathdefault">x</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.849108em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathdefault mtight" style="margin-right:0.03148em;">k</span></span></span></span></span></span></span></span></span></span></span> is drawn from <span class="katex"><span class="katex-mathml"><math><semantics><mrow><msup><mi>p</mi><mo>∗</mo></msup></mrow><annotation encoding="application/x-tex">p^*</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8831359999999999em;vertical-align:-0.19444em;"></span><span class="mord"><span class="mord mathdefault">p</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.688696em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mbin mtight">∗</span></span></span></span></span></span></span></span></span></span></span>, we are actually referring to this ad-hoc distribution (conjured by the dataset collector). Good test log likelihood means that the model's generalization -- or its inductive bias -- conincide with the &quot;inductive bias&quot; of the dataset collection process.</p>
+<p>In supervised learning, the dataset covers a (ad-hoc) subset of all possible images, but if any classifier wants to classify correctly on all images, it should at least classify correctly on our dataset: these are not conflictory goals. For generative models, on the other hand, if a generative model generates a distribution that is identical to one data collection process <span class="katex"><span class="katex-mathml"><math><semantics><mrow><msup><mi>p</mi><mo>∗</mo></msup></mrow><annotation encoding="application/x-tex">p^*</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8831359999999999em;vertical-align:-0.19444em;"></span><span class="mord"><span class="mord mathdefault">p</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.688696em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mbin mtight">∗</span></span></span></span></span></span></span></span></span></span></span>, it cannot be identical to another. Agreeing with two different <span class="katex"><span class="katex-mathml"><math><semantics><mrow><msup><mi>p</mi><mo>∗</mo></msup></mrow><annotation encoding="application/x-tex">p^*</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8831359999999999em;vertical-align:-0.19444em;"></span><span class="mord"><span class="mord mathdefault">p</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.688696em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mbin mtight">∗</span></span></span></span></span></span></span></span></span></span></span> is inherently conflictory. This is illustrated in the figure below.</p>
+<p><img src="file:///home/zsj/Projects/BiasAndGeneralizationBlog/img/illustration_coverage.png" alt="example_coverage"></p>
+<p>#In fact, this illustration far under-emphasize the magnitude of this issue. In practice, the set of possible images is huge, and not very well defined. Our data collection process, even one as comprehensive as imagenet only cover a small fraction of all possible scenes that could appear.</p>
+<h1 id="empirical-study-of-generalization">Empirical Study of Generalization</h1>
+<p>We now come back to our old question -- how do we evaluate the generalization behavior of generative models? It seems that we must resort to human evaluation as the gold standard. This is indeed a must-have evaluation method for almost every generative models paper. However, human evaluation is biased by the taste of the human viewer, and are usually determined by the amount of hardwork put into cherry picking. Is there something slightly more objective?</p>
+<p>Note that human evaluation also gives us much more than a cold performance number, we can also observe the type of successes and failures the model demonstrates. The rick information is also one reason why human evaluation is often preferred. We would like to have that too.</p>
+<p>In our paper <a href="https://arxiv.org/abs/1811.03259">(ArXiv)</a> <a href="https://media.nips.cc/nipsbooks/nipspapers/paper_files/nips31/reviews/6882.html">(Reviews)</a> at NeurIPS 2018 we proposed a new method to visualize the behavior of a deep generative model.</p>
+<p>[1] Notes on evaluation of generative models</p>
+
+
+<h1>MNIST Result</h1>
+<p id="p2">Drag the slider to display the result.</p>
+<p> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Training Distribution&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Generated Distribution (CNN)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Generated Distribution (RNN) </p>
+<p id="p1"></p>
+
+
+<div class="slidecontainer">
+  <input type="range" min="1" max="10" value="30" class="slider" id="myRange">
+  <p>Value: <span id="demo"></span></p>
+</div>
+
+<script>
+var slider = document.getElementById("myRange");
+var output = document.getElementById("demo");
+output.innerHTML = slider.value;
+
+slider.oninput = function() {
+  //output.innerHTML = this.value;
+    var y = document.getElementById("p1");
+    if (y.childNodes.length == 3) {
+    	y.removeChild(y.childNodes[0]);
+    	y.removeChild(y.childNodes[0]);
+    	y.removeChild(y.childNodes[0]);
+    }
+    //var y = document.getElementById("p1");
+    var x = document.createElement("IMG");
+    x.setAttribute("src", "https://raw.githubusercontent.com/hyren/clevr-dataset-gen/master/imgs/train_"+this.value+".png");
+    x.setAttribute("width", "304");
+    x.setAttribute("height", "228");
+    x.setAttribute("alt", "The Pulpit Rock");
+    y.appendChild(x);
+    var x = document.createElement("IMG");
+    x.setAttribute("src", "https://raw.githubusercontent.com/hyren/clevr-dataset-gen/master/imgs/WGAN-GP.CNN.64."+this.value+".png");
+    x.setAttribute("width", "304");
+    x.setAttribute("height", "228");
+    x.setAttribute("alt", "The Pulpit Rock");
+    y.appendChild(x);
+    var x = document.createElement("IMG");
+    x.setAttribute("src", "https://raw.githubusercontent.com/hyren/clevr-dataset-gen/master/imgs/WGAN-GP.RNN.64."+this.value+".png");
+    x.setAttribute("width", "304");
+    x.setAttribute("height", "228");
+    x.setAttribute("alt", "The Pulpit Rock");
+    y.appendChild(x);
+    //document.body.appendChild(x);
+}
+</script>
+
+    </body>
+    </html>
