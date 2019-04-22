@@ -9,7 +9,7 @@ If the training image has red/blue cars but only red buses, will generative mode
 
 ![example_car](img/example_car.png)
 
-These questions are extremely difficult to answer. In fact, it is not even clear what is "good" generalization. For example, should a model generate exotic combinations such as black swan or black snow. If they shouldn't, how do we decide which combinations are exotic and which are not? These questions seem to fundamentally lack a clear-cut correct answer. 
+These questions are difficult to answer. For example, should a model generate exotic combinations such as black swan or black snow. If they shouldn't, how do we decide which combinations are exotic and which are not? These questions seem to fundamentally lack a clear-cut correct answer. 
 
 ![example_swan](img/example_swan.png)
 
@@ -17,12 +17,12 @@ One could, of course, argue that log likelihood (on the test set) is a good eval
 
 ## (One more) reason to be dissatisfied with log likelihood
 
-When we talk about log likelihood we always assume some underlying distribution $p^*$, and test examples $x^1, \cdots, x^k$ drawn i.i.d. from $p^*$. However,$p^*$ is usually some **ad-hoc** distribution. For example, MNIST is collected from handwritten zipcodes from a particular population and preprocessed in a particular way --- had someone else prepared this dataset, it would certainly look much different --- $p^*$ is just an arbitrary subset of valid handwritten digits. The same can be said for essentially every dataset. <!-- When we say the training and test data $x^1, \cdots, x^k$ is drawn from $p^*$, we are actually referring to this ad-hoc distribution (conjured by the dataset collector).  -->
+When we talk about log likelihood we always assume some underlying distribution $p^*$, and test examples $x^1, \cdots, x^k$ drawn i.i.d. from $p^*$. However,$p^*$ is usually some **ad-hoc** distribution. For example, MNIST is collected from handwritten zipcodes from a particular population and preprocessed in a particular way --- had someone else prepared this dataset, it would certainly look much different --- it is an arbitrary subset of valid handwritten digits. The same can be said for essentially every dataset. <!-- When we say the training and test data $x^1, \cdots, x^k$ is drawn from $p^*$, we are actually referring to this ad-hoc distribution (conjured by the dataset collector).  -->
 Good test log likelihood means that the model's generalization -- or its inductive bias -- conincide with the dataset collection process. 
 
  In supervised learning this is not a big issue: if any classifier wants to classify correctly on all images, it should at least classify correctly on our dataset -- achieving simultaneous high accuracy on different datasets is not inherently conflictory. However, if a generative model generates a distribution that is identical to one data collection process $p^*$, it cannot be identical to another. Agreeing with two different $p^*$ is inherently conflictory. 
  
- But if we just look at the data samples, which data collection distribution do they come from? There are many plausible answers. This is illustrated in the figure below. There is nothing special about the data collection process that we just happen to choose. Therefore, it is unclear why we should require our generative model to produce that particular distribution. 
+ But if we just look at the data samples, which data collection distribution do they come from? There are many plausible answers. This is illustrated in the figure below. There is nothing special about the data collection process that we just happen to choose. Why should our generative model produce that particular distribution? 
 
 ![example_coverage](img/illustration_coverage.png)
 
@@ -30,72 +30,56 @@ Good test log likelihood means that the model's generalization -- or its inducti
 
 # Empirical Study of Generalization
 
-It seems that we must resort to human evaluation as the gold standard. This is indeed a must-have evaluation method for almost every generative models paper. However, human evaluation is biased by the taste of the human viewer, and the amount of hardwork put into cherry picking. Is there something slightly more objective? 
+It seems that we must resort to human evaluation as the gold standard. This is indeed a must-have evaluation method for almost every generative models paper. However, human evaluation is biased by the taste of the human viewer (and the amount of cherry picking effort). Is there something slightly more objective? 
 
-Note that human evaluation also gives us much more than a cold performance number, we can also observe the type of successes and failures the model demonstrates. The rick information is also one reason why human evaluation is often preferred. We would like to have that too. 
+Human evaluation also gives us much more than a cold performance number, we can also observe the type of successes and failures the model demonstrates. We would like to have that too. 
 
-In our paper [(ArXiv)](https://arxiv.org/abs/1811.03259) [(NeurIPS 2018 Spotlight Video)](https://www.videoken.com/embed/d37VHhPILAU?tocitem=40) we proposed a new method to visualize the behavior of a deep generative model. Our proposed strategy is to design datasets to "probe" the behavior of the generative model. We think about the generative model training algorithm as a function that maps input training distribution into output generated distribution. 
+In our paper [(ArXiv)](https://arxiv.org/abs/1811.03259) [(NeurIPS 2018 Spotlight Video)](https://www.videoken.com/embed/d37VHhPILAU?tocitem=40) we proposed a new method to visualize the behavior of a deep generative model. We think about the generative model training algorithm as a function that maps input training distribution into output generated distribution. We design input training distributions to "probe" the properties of this function.
 
-However, as images are high dimensional, we choose low dimensional feature spaces to explore the model's behavior. We study the input - ouput relationship when it is projected into this low dimensional feature space. 
+[maybe a plot of the training algorithm as a function]
 
-1. If every image in the training set has some feature, will different features be present in the generated images. 
+However, images are high dimensional, so studying this function from training images to test images is infeasible. However, we can study this function when it is **projected** into a low dimensional feature space. We three examples of this strategy we study three problems. 
 
-2. If every image in the training set 
+Before we present the results, we remark that most results we present here (and in the paper) are qualitatively similar for different models (GAN, VAE, Recurrent), architectures (CONV, FC), parameter counts, training set sizes, and hyper-parameters. It is impossible to include everything, but we believe that our selection is sufficient inclusive, such that these results are most likely valid for typical modern instantiations of generative models. 
 
-3. If the training image contain combinations of features, will the generative model generate new combinations?
+## Setup 1. Input-Output Relationship of a Single Value of a Single Feature
 
-To test this, we design a dataset where each image contains 
+In our first setup, all images in the training set, when projected onto a feature space, takes a single value. As an example, we use numerosity (number of objects). For example, if all images in the training set contain 3 objects, will the generated images have a different numerosity? It seems that since the model is trained a hundreds of thousands of images --- each with 3 objects --- the model should generate images with 3 objects. Actually this is not true. 
 
-![sm](img/sm.png)
+Below we interactively visualize the training images (image with 1-9 dots) and the generated images. Observe that the number of generated dots is often different from the training images. 
 
-![mm](img/mm.png)
+[Insert interactive plots]
+
+When we plot the number of dots in the paper, we observe that the generated numerosity is roughly a log-normal shaped distribution around the training numerosity. 
+<!-- ![sm](img/sm.png)  -->
+<!-- ![mm](img/mm.png)
+ -->
+
+We experimented with several other features (size, location, color), and observed similar patterns: the generated feature is a normal or log-normal shaped distribution around the true feature value. This reveals the strong visual inductive bias of deep generative models. 
+
+## Setup 2. Input-Output Relationship of Multiple Values of a Single Feature
+
+In our second setup, the training image, when projected onto a feature space, takes multiple values. It turns out that the output distribution is very predictable: we take its output distribution for each input value separately (i.e. we studied this in setup 1), and sum them up. In other words, the learning algorithm behaves like a linear filter. 
 
 
-<h1>MNIST Result</h1>
-<p id="p2">Drag the slider to display the result.</p>
-<p> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Training Distribution&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Generated Distribution (CNN)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Generated Distribution (RNN) </p>
-<p id="p1"></p>
+Below we interactive visualize the training values (e.g. the input image is either 10% or 50% red colored, its distribution has two "spikes"), and the output distribution. Observe how the algorithm behaves like a linear filter. 
 
+The exception is when the two distributions are close together (e.g. the input image is either 40% or 50% red). The generated distribution will he more concentrated around the mean (e.g. 45% red). This effect is referred to "prototype enhancement" in cognitive psychology.  
 
-<div class="slidecontainer">
-  <input type="range" min="1" max="10" value="30" class="slider" id="myRange">
-  <p>Value: <span id="demo"></span></p>
-</div>
+[Insert interactive plots]
 
-<script>
-var slider = document.getElementById("myRange");
-var output = document.getElementById("demo");
-output.innerHTML = slider.value;
+## Setup 3. Combinations of Multiple Features 
 
-slider.oninput = function() {
-  //output.innerHTML = this.value;
-    var y = document.getElementById("p1");
-    if (y.childNodes.length == 3) {
-    	y.removeChild(y.childNodes[0]);
-    	y.removeChild(y.childNodes[0]);
-    	y.removeChild(y.childNodes[0]);
-    }
-    //var y = document.getElementById("p1");
-    var x = document.createElement("IMG");
-    x.setAttribute("src", "https://raw.githubusercontent.com/hyren/clevr-dataset-gen/master/imgs/train_"+this.value+".png");
-    x.setAttribute("width", "304");
-    x.setAttribute("height", "228");
-    x.setAttribute("alt", "The Pulpit Rock");
-    y.appendChild(x);
-    var x = document.createElement("IMG");
-    x.setAttribute("src", "https://raw.githubusercontent.com/hyren/clevr-dataset-gen/master/imgs/WGAN-GP.CNN.64."+this.value+".png");
-    x.setAttribute("width", "304");
-    x.setAttribute("height", "228");
-    x.setAttribute("alt", "The Pulpit Rock");
-    y.appendChild(x);
-    var x = document.createElement("IMG");
-    x.setAttribute("src", "https://raw.githubusercontent.com/hyren/clevr-dataset-gen/master/imgs/WGAN-GP.RNN.64."+this.value+".png");
-    x.setAttribute("width", "304");
-    x.setAttribute("height", "228");
-    x.setAttribute("alt", "The Pulpit Rock");
-    y.appendChild(x);
-    //document.body.appendChild(x);
-}
-</script>
+Finally we study the model's behavior when there are multiple features. We ask: if we observe some but not all combinations of two features, will the model generates new features. This helps us answer questions such as "will the model generate black swans?".  
+
+Below we visualize the input combinations (MNIST digits) compared to the output combinations. It can be observed that when there are few combinations (e.g. 10), the model does not generate much new combinations. It always perfectly memorizes. When there are more (e.g. 80), the model generates almost every combination. 
+
+[Insert interactive plots]
+
+We emphasize that this is almost independent of model parameter-count and training set size. In fact, deep networks should be able to memorize huge amounts of random information [2], and when we train the model to memorize by supervised training, it indeed memorizes. This means that this phenomenon relate to how generative models are learned. 
+
+We believe that this property --- whether generative models produce novel combinations --- is particularly important and difficult to describe. Therefore, we provide [Repo] a toolbox to visualize this property, and to calculate a performance metric indicating whether the model is prone to memorization or prone to generalization. 
+
 
 [1] Notes on evaluation of generative models
+[2] Zhang et al 2016 
