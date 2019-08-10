@@ -15,29 +15,27 @@ These questions are difficult to answer. For example, should a model generate ex
 
 ![example_swan](img/example_swan.png)
 
-One could, of course, argue that log likelihood (on the test set) is a good evaluation metric -- at least it seems to be the least ad-hoc. However, in addition to the noted practical short-comings of log likelihood [1], there is a deeper and more fundamental objection. 
+One could, of course, argue that log likelihood (on the test set) is a good evaluation metric -- at least it seems to be the least ad-hoc. However, in addition to the noted practical short-comings of log likelihood [1], there is a deep conceptual objection. 
 
 ## (One more) reason to be dissatisfied with log likelihood
 
-Log likelihood measures whether the model produces a particular distribution --- our data collection distribution. However, it is seldomly questioned why this is even a desirable goal? 
+Log likelihood measures whether the model produces a particular distribution --- our data collection distribution. However, it is seldomly questioned why this is a desirable goal to begin with.
 
-For example, just by look at the training samples (left figure), many different data collection distributions are plausible (middle figure), and if we draw additional test samples, they will also be different (right figure). 
+For example, if we only look at the training samples (left figure), many different data collection distributions are plausible (middle figure), and if we draw additional test samples, they will also be different (right figure). 
 
 ![example_coverage](img/illustration_coverage.png)
 
-However, we choose a particular distribution we decide on how to collect the data. For example, one image dataset may contain black swans because it is sampled from the internet that do contain such images. Another might not because it is captured from real world cameras. Why should we reward the learning algorithm for accurately producing a particular data collection distribution, but not anything else?
+However, we choose a particular `"ground truth" distribution when we decide the data collection process. For example, one image dataset may contain black swans because it is drawn from the internet (google"black swan" and there are plenty); another might not because it only include unmodified camera-taken images. Decisions in data collection drastically change the "ground truth" distribution. Then, why should we reward the learning algorithm for accurately producing a particular data collection distribution, but not anything else?
 
-This issue is less severe for supervised learning. The key difference is that the goal of supervised learning --- prediction accuracy --- usually has intrinsic value: we can use it to make decisions about the future. Even though test set accuracy only measures performance on a specific data collection distribution, it is still a worthy goal. On the other hand, generative modeling is usually framed as a mean to an end. High likelihood by itself is not the most useful --- it is the downstream tasks: feature learning, perceptual compression, image synthesis and imputation, or even artistic design that are of greatest value. 
+This issue is less severe for supervised learning. The key difference is that the goal of supervised learning --- prediction accuracy --- usually has intrinsic value. We can use it to make decisions about the future, but only in situations similar to the situations we collected the data from. It is still a worthy goal despite the short-coming (which domain adaptation or robustness seek to address). On the other hand, generative modeling is usually framed as a mean to an end. High likelihood by itself is not the most useful --- it is the downstream tasks: feature learning, perceptual compression, image synthesis and imputation, or even artistic design that are of greatest value.
 
 # Empirical Study of Generalization
 
 It seems that we must resort to human evaluation as the gold standard. This is indeed a must-have evaluation method for almost every generative models paper. However, human evaluation is biased by the taste of the human viewer. Is there something slightly more objective? 
 
-<!-- Human evaluation also gives us much more than a cold performance number, we can also observe the type of successes and failures the model demonstrates. We would like to have that too.  -->
-
 In our paper [(ArXiv)](https://arxiv.org/abs/1811.03259) [(NeurIPS 2018 Spotlight Video)](https://www.videoken.com/embed/d37VHhPILAU?tocitem=40) we proposed a new method to visualize the behavior of a deep generative model. We think about the generative model training algorithm as a function that maps input training distribution into output generated distribution. We design input training distributions and observe the output generated distribution to "probe" this function.
 
-[maybe a plot of the training algorithm as a function]
+![learning_algorithm](img/illustration_learning.png)
 
 However, images are high dimensional, so studying this function from training images to test images is infeasible. However, we can study this function when the inputs and outputs are projected into a low dimensional feature space. For example, we can look at the object-count feature, and look at the number of objects in input images, and the number of objects in output generated images. We propose three example strategies to probe the function.
 
@@ -83,7 +81,7 @@ We believe that this property --- whether generative models produce novel combin
 
 
 # References
-[1] Notes on evaluation of generative models
+[1] Theis, Lucas, Aäron van den Oord, and Matthias Bethge. "A note on the evaluation of generative models." *arXiv preprint arXiv:1511.01844* (2015).
 
 [2] Zhang et al 2016 
 
